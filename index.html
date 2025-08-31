@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>随机抽取zwyladx</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3B82F6",
+              secondary: "#EC4899",
+              accent: "#10B981",
+              dark: "#1F2937",
+              light: "#F9FAFB",
+            },
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .text-shadow {
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .animate-spin-slow {
+          animation: spin 3s linear infinite;
+        }
+        .animate-bounce-slow {
+          animation: bounce 2s infinite;
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen font-sans text-dark"
+  >
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+      <!-- 页面标题 -->
+      <header class="text-center mb-10 mt-6">
+        <h1
+          class="text-[clamp(2rem,5vw,3rem)] font-bold text-dark text-shadow mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary"
+        >
+          随机抽取zwyladx
+        </h1>
+        <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+          点击抽取按钮，随机选择一个名字
+        </p>
+      </header>
+
+      <!-- 主内容区 -->
+      <main
+        class="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl"
+      >
+        <!-- 隐藏的名字列表（在代码中预先填写） -->
+
+        <!-- 操作区域 -->
+        <div class="p-6 md:p-8 border-b border-gray-100 text-center">
+          <button
+            id="pickBtn"
+            class="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 px-10 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30 flex items-center justify-center gap-2 mx-auto"
+          >
+            <i class="fa fa-random"></i>
+            <span>抽取名字</span>
+          </button>
+        </div>
+
+        <!-- 结果展示区域 -->
+        <div class="p-6 md:p-8 bg-gray-50">
+          <h2
+            class="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2"
+          >
+            <i class="fa fa-trophy text-yellow-500"></i>
+            抽取结果
+          </h2>
+
+          <div
+            id="resultContainer"
+            class="min-h-[180px] flex items-center justify-center"
+          >
+            <div id="initialState" class="text-center text-gray-400">
+              <i
+                class="fa fa-hand-pointer-o text-4xl mb-3 animate-bounce-slow"
+              ></i>
+              <p>点击上方按钮开始抽取</p>
+            </div>
+
+            <div id="loadingState" class="text-center hidden">
+              <div
+                class="inline-block w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin-slow mb-3"
+              ></div>
+              <p class="text-gray-600">正在随机抽取中...</p>
+            </div>
+
+            <div id="resultState" class="w-full hidden text-center">
+              <div id="resultList" class="flex justify-center mb-6">
+                <!-- 结果将在这里动态生成 -->
+              </div>
+            </div>
+
+            <div id="errorState" class="text-center hidden">
+              <i
+                class="fa fa-exclamation-circle text-red-500 text-4xl mb-3"
+              ></i>
+              <p id="errorMessage" class="text-red-500"></p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- 页脚 -->
+      <footer class="mt-10 text-center text-gray-500 text-sm">
+        <p>随机名字抽取工具:Li</p>
+      </footer>
+
+      <!-- 成功提示 -->
+      <div
+        id="toast"
+        class="fixed top-4 right-4 bg-accent text-white px-4 py-2 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 flex items-center gap-2"
+      >
+        <i class="fa fa-check-circle"></i>
+        <span id="toastMessage">操作成功</span>
+      </div>
+    </div>
+
+    <script>
+      // 在代码中预先填写名字列表
+      const nameList = [
+        "白",
+        "崔",
+        "羽毛球",
+        "袁",
+        "孙",
+        "大",
+        "野",
+        "杜",
+        // 可以在这里继续添加更多名字
+      ];
+
+      // DOM元素
+      const pickBtn = document.getElementById("pickBtn");
+
+      // 状态元素
+      const initialState = document.getElementById("initialState");
+      const loadingState = document.getElementById("loadingState");
+      const resultState = document.getElementById("resultState");
+      const errorState = document.getElementById("errorState");
+      const resultList = document.getElementById("resultList");
+      const errorMessage = document.getElementById("errorMessage");
+      const toast = document.getElementById("toast");
+      const toastMessage = document.getElementById("toastMessage");
+
+      // 事件监听
+      pickBtn.addEventListener("click", startPick);
+
+      // 开始抽取
+      function startPick() {
+        // 验证名字列表
+        if (nameList.length === 0) {
+          showError("名字列表为空，请在代码中添加名字");
+          return;
+        }
+
+        // 显示加载状态
+        showState("loading");
+
+        // 模拟抽取过程（延迟增加视觉效果）
+        setTimeout(() => {
+          const result = pickName();
+          displayResult(result);
+          showState("result");
+        }, 1500);
+      }
+
+      // 抽取一个名字（允许重复）
+      function pickName() {
+        const randomIndex = Math.floor(Math.random() * nameList.length);
+        return nameList[randomIndex];
+      }
+
+      // 显示结果
+      function displayResult(name) {
+        resultList.innerHTML = "";
+
+        const resultItem = document.createElement("div");
+        resultItem.className = `bg-white text-gray-800 rounded-xl px-8 py-6 shadow-md transform transition-all duration-500 hover:scale-105 hover:shadow-lg flex items-center gap-3`;
+
+        // 添加奖杯图标
+        const trophyIcon = document.createElement("i");
+        trophyIcon.className = "fa fa-trophy text-yellow-500 text-2xl";
+        resultItem.appendChild(trophyIcon);
+
+        const nameText = document.createElement("span");
+        nameText.className = "font-bold text-xl";
+        nameText.textContent = name;
+        resultItem.appendChild(nameText);
+
+        resultList.appendChild(resultItem);
+      }
+
+      // 显示不同状态
+      function showState(state) {
+        initialState.classList.add("hidden");
+        loadingState.classList.add("hidden");
+        resultState.classList.add("hidden");
+        errorState.classList.add("hidden");
+
+        switch (state) {
+          case "initial":
+            initialState.classList.remove("hidden");
+            break;
+          case "loading":
+            loadingState.classList.remove("hidden");
+            break;
+          case "result":
+            resultState.classList.remove("hidden");
+            break;
+          case "error":
+            errorState.classList.remove("hidden");
+            break;
+        }
+      }
+
+      // 显示错误信息
+      function showError(message) {
+        errorMessage.textContent = message;
+        showState("error");
+
+        // 3秒后自动回到初始状态
+        setTimeout(() => {
+          showState("initial");
+        }, 3000);
+      }
+
+      // 显示提示信息
+      function showToast(message) {
+        toastMessage.textContent = message;
+        toast.classList.remove("translate-x-full");
+
+        setTimeout(() => {
+          toast.classList.add("translate-x-full");
+        }, 2000);
+      }
+    </script>
+  </body>
+</html>
